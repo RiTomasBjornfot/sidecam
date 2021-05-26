@@ -1,9 +1,11 @@
 using Pipe, Images, Statistics, LinearAlgebra, DelimitedFiles, Plots
+include("crop.jl")
 import JLD
 "Sets all values between 0 and 1"
 norm(x) = @pipe x .- minimum(x) |> _ ./ maximum(_)
 
 "Finds the boundaries in the image"
+#=
 iml(z, λ, dim) = @pipe (z 
   |> norm
   |> (_ .< λ) 
@@ -12,22 +14,25 @@ iml(z, λ, dim) = @pipe (z
   |> findall(x -> x > 0, _) 
   |> extrema
 )
-
+=#
 "cuts an image over a dimension"
-imc(z, dim, idx) = (dim == 1) ? z[:, idx[1]:idx[2]] : z[idx[1]:idx[2], :]
+#imc(z, dim, idx) = (dim == 1) ? z[:, idx[1]:idx[2]] : z[idx[1]:idx[2], :]
 
 "Cuts an image"
+#=
 function imcut(z, λ)
   z2 = @pipe iml(z, λ, 1) |> imc(z, 1, _)
   @pipe iml(z2, λ, 2) |> imc(z2, 2, _)
 end
+=#
 
 "import an image"
 imtovec(dir, fname) = @pipe (dir*fname 
   |> load(_) 
   |> Gray.(_)
   |> Float64.(_) 
-  |> imcut(_, 0.98) 
+  #|> imcut(_, 0.98) 
+  |> Crop.crop(_, (0, 0.9), 10) 
   |> imresize(_, (60, 60))
   |> _[1:25, :]
   #|> imfilter(_, Kernel.gaussian(2))
